@@ -5,11 +5,7 @@ from CPU_Simulation.constants import *
 
 # Window Management
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("CPU_Simulation, By: ArjunSahlot")
-
-
-def draw_window(win):
-    win.fill(WHITE)
+pygame.display.set_caption("CPU Simulation")
 
 
 def main(win, width, height):
@@ -18,7 +14,7 @@ def main(win, width, height):
     run = True
     while run:
         clock.tick(FPS)
-        draw_window(win)
+        win.fill(BLACK)
         events = pygame.event.get()
         for event in events:
             if event.type == pygame.QUIT:
