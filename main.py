@@ -10,13 +10,13 @@ WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("CPU Simulation")
 
 
-def draw_window(win):
-    win.fill((47, 47, 47))
-    pygame.draw.rect(win, (43, 43, 43), BOX, border_radius=10)
-    pygame.draw.rect(win, (60, 60, 60), BOX, 10, border_radius=10)
+def draw_window(window):
+    window.fill((47, 47, 47))
+    pygame.draw.rect(window, (43, 43, 43), BOX, border_radius=10)
+    pygame.draw.rect(window, (60, 60, 60), BOX, 10, border_radius=10)
 
 
-def main(win, width, height):
+def main(window, width, height):
     clock = pygame.time.Clock()
     paths = []
     ops = []
@@ -36,12 +36,12 @@ def main(win, width, height):
     run = True
     while run:
         clock.tick(FPS)
-        draw_window(win)
+        draw_window(window)
         events = pygame.event.get()
         mx, my = pygame.mouse.get_pos()
 
         for name, text in texts.items():
-            state = text.update(win, events)
+            state = text.update(window, events)
             if state:
                 moving_ops = Operator(text.x, text.y, name)
                 ops.append(moving_ops)
@@ -54,7 +54,7 @@ def main(win, width, height):
                 text_clicking = False
 
         for op in ops:
-            state = op.update(win, events)
+            state = op.update(window, events)
             if state:
                 ops.remove(op)
                 moving_ops = op
@@ -66,7 +66,7 @@ def main(win, width, height):
                 moving_ops = None
 
         if moving_ops is not None:
-            moving_ops.update(win, events)
+            moving_ops.update(window, events)
             moving_ops.x, moving_ops.y = mx - moving_ops.width // 2, my - moving_ops.height // 2
 
         for event in events:

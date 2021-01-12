@@ -29,14 +29,15 @@ class Operator:
             self.height = 60
         else:
             self.inputs = [Input(self, 1), Input(self, 2)]
-        # self.output = Output()
+        self.output = Output(self)
 
-    def update(self, win, events):
+    def update(self, window, events):
         mx, my = pygame.mouse.get_pos()
-        self.draw(win)
+        self.draw(window)
         for input in self.inputs:
-            input.update(win)
-        # self.output.status = self.func(*self.inputs)
+            input.update(window)
+        self.output.update(window)
+        self.output.status = self.func(*self.inputs)
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.x < mx < self.x + self.width and self.y < my < self.y + self.height:
@@ -44,10 +45,10 @@ class Operator:
             if event.type == pygame.MOUSEBUTTONUP:
                 return False
 
-    def draw(self, win):
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height))
+    def draw(self, window):
+        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
         text = self.font.render(self.name, 1, WHITE)
-        win.blit(text, (self.x + self.width // 2 - text.get_width() // 2, self.y + self.height // 2 - text.get_height() // 3))
+        window.blit(text, (self.x + self.width // 2 - text.get_width() // 2, self.y + self.height // 2 - text.get_height() // 3))
 
     def __repr__(self):
         return self.name
@@ -68,11 +69,11 @@ class Input:
         self.x = self.host.x
         self.y = int((self.host.height * (self.index / 4)) + self.host.y)
 
-    def update(self, win):
+    def update(self, window):
         self.calc_pos()
         if self.output is not None:
             self.status = self.output.status
-        self.draw(win)
+        self.draw(window)
 
     def mouse_release(self, events):
         for event in events:
@@ -80,11 +81,38 @@ class Input:
                 x, y = event.pos
                 return (x - self.x)**2 + (y - self.y)**2 <= self.radius
 
-    def draw(self, win):
-        pygame.draw.circle(win, self.color, (self.x, self.y), self.radius)
+    def draw(self, window):
+        pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
 
     def plug(self, output):
         self.output = output
+
+
+class Output:
+    radius = 15
+    color = (0, 0, 0)
+
+    def __init__(self, host):
+        self.host = host
+        self.x = self.y = 0
+        self.status = None
+
+    def calc_pos(self):
+        self.x = self.host.x + self.host.width
+        self.y = self.host.y + self.host.height/2
+
+    def update(self, window):
+        self.calc_pos()
+        self.draw(window)
+
+    def mouse_clicked(self, events):
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                return (x - self.x)**2 + (y - self.y)**2 <= self.radius
+
+    def draw(self, window):
+        pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
 
 
 class Path:
@@ -106,8 +134,8 @@ class Text:
         self.width = self.text.get_width() + 30
         self.color = (47, 47, 47)
 
-    def update(self, win, events):
-        self.draw(win)
+    def update(self, window, events):
+        self.draw(window)
 
         if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
             self.color = (62, 62, 62)
@@ -122,6 +150,6 @@ class Text:
                 if not pygame.Rect(50, self.y, 704, self.height).collidepoint(pygame.mouse.get_pos()):
                     return False
 
-    def draw(self, win):
-        pygame.draw.rect(win, self.color, (self.x, self.y, self.width, self.height))
-        win.blit(self.text, (self.x + self.width//2 - self.text.get_width()//2, self.y + self.height//2 - self.text.get_height()//3))
+    def draw(self, window):
+        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
+        window.blit(self.text, (self.x + self.width//2 - self.text.get_width()//2, self.y + self.height//2 - self.text.get_height()//3))
