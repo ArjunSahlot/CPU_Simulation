@@ -1,7 +1,7 @@
 import pygame
 import os
-from CPU_Simulation.constants import *
-from CPU_Simulation.classes import *
+from constants import *
+from classes import *
 
 pygame.init()
 

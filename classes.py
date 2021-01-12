@@ -1,6 +1,6 @@
 import pygame
-import CPU_Simulation.operations as ops
-from CPU_Simulation.constants import *
+import operations as ops
+from constants import *
 
 pygame.init()
 
@@ -109,14 +109,17 @@ class Text:
     def update(self, win, events):
         self.draw(win)
 
+        if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
+            self.color = (62, 62, 62)
+        else:
+            self.color = (47, 47, 47)
+
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
-                    self.color = (62, 62, 62)
                     return True
             if event.type == pygame.MOUSEBUTTONUP:
                 if not pygame.Rect(50, self.y, 704, self.height).collidepoint(pygame.mouse.get_pos()):
-                    self.color = (47, 47, 47)
                     return False
 
     def draw(self, win):
