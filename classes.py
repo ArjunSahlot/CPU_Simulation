@@ -37,7 +37,8 @@ class Operator:
         for input in self.inputs:
             input.update(window)
         self.output.update(window)
-        self.output.status = self.func(*self.inputs)
+        if all([inp.status for inp in self.inputs]):
+            self.output.status = self.func(*self.inputs)
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.x < mx < self.x + self.width and self.y < my < self.y + self.height:
@@ -56,7 +57,6 @@ class Operator:
 
 class Input:
     radius = 15
-    color = (0, 0, 0)
 
     def __init__(self, host, index):
         self.host = host
@@ -64,6 +64,7 @@ class Input:
         self.x = self.y = 0
         self.output = None
         self.status = None
+        self.color = (0, 0, 0)
 
     def calc_pos(self):
         self.x = self.host.x
@@ -71,15 +72,21 @@ class Input:
 
     def update(self, window):
         self.calc_pos()
+        self.draw(window)
         if self.output is not None:
             self.status = self.output.status
-        self.draw(window)
+        if self.hovered():
+            self.color = (170, 168, 170)
+        else:
+            self.color = (0, 0, 0)
 
     def mouse_release(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONUP:
-                x, y = event.pos
-                return (x - self.x)**2 + (y - self.y)**2 <= self.radius
+                return self.hovered()
+    
+    def hovered(self):
+        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2) <= self.radius
 
     def draw(self, window):
         pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
@@ -90,12 +97,12 @@ class Input:
 
 class Output:
     radius = 15
-    color = (0, 0, 0)
 
     def __init__(self, host):
         self.host = host
         self.x = self.y = 0
         self.status = None
+        self.color = (0, 0, 0)
 
     def calc_pos(self):
         self.x = self.host.x + self.host.width
@@ -104,12 +111,18 @@ class Output:
     def update(self, window):
         self.calc_pos()
         self.draw(window)
+        if self.hovered():
+            self.color = (170, 168, 170)
+        else:
+            self.color = (0, 0, 0)
 
     def mouse_clicked(self, events):
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = event.pos
-                return (x - self.x)**2 + (y - self.y)**2 <= self.radius
+                return self.hovered()
+
+    def hovered(self):
+        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2) <= self.radius
 
     def draw(self, window):
         pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
