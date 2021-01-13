@@ -46,6 +46,19 @@ class Operator:
             if event.type == pygame.MOUSEBUTTONUP:
                 return False
 
+    def hovered(self):
+        return pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos())
+    
+    def hovered_inps(self):
+        for inp in self.inputs:
+            if inp.hovered():
+                return inp
+        
+        return False
+    
+    def hovered_out(self):
+        return self.output.hovered()
+
     def draw(self, window):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
         text = self.font.render(self.name, 1, WHITE)
@@ -86,7 +99,7 @@ class Input:
                 return self.hovered()
     
     def hovered(self):
-        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2) <= self.radius
+        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2)**0.5 <= self.radius
 
     def draw(self, window):
         pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
@@ -122,7 +135,7 @@ class Output:
                 return self.hovered()
 
     def hovered(self):
-        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2) <= self.radius
+        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2)**0.5 <= self.radius
 
     def draw(self, window):
         pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
@@ -131,38 +144,32 @@ class Output:
 class Path:
     width = 5
 
-    def __init__(self, input, output):
-        self.input, self.output = input, output
-        input.plug(output)
-
-
-class Text:
-    height = 65
-    y = 815
-    font = pygame.font.SysFont("comicsans", 45)
-
-    def __init__(self, x, text):
-        self.x = x
-        self.text = self.font.render(text.upper(), 1, WHITE)
-        self.width = self.text.get_width() + 30
-        self.color = (47, 47, 47)
-
-    def update(self, window, events):
-        self.draw(window)
-
-        if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
-            self.color = (62, 62, 62)
-        else:
-            self.color = (47, 47, 47)
-
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
-                    return True
-            if event.type == pygame.MOUSEBUTTONUP:
-                if not pygame.Rect(50, self.y, 704, self.height).collidepoint(pygame.mouse.get_pos()):
-                    return False
+    def __init__(self, output):
+        self.output = output
+        self.input = None
+    
+    def register(self, input):
+        input.plug(self.output)
+        self.input = input
 
     def draw(self, window):
-        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (self.x + self.width//2 - self.text.get_width()//2, self.y + self.height//2 - self.text.get_height()//3))
+        p1 = (self.output.x, self.output.y)
+        p2 = pygame.mouse.get_pos()
+        if self.input is not None:
+            p2 = (self.input.x, self.input.y)
+        
+        color = (226, 22, 62) if self.output.status else (37, 35, 40)
+        pygame.draw.line(window, color, p1, p2, self.width)
+
+
+class OperatorManager:
+    def __init__(self):
+        self.x, self.y, self.width, self.height = BOX
+        self.ops = []
+        self.paths = []
+        self.moving_op = None
+    
+    def update(self, window, events):
+        for op in self.ops:
+            op.update(window, events)
+        

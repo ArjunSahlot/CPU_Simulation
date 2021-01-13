@@ -1,7 +1,8 @@
 import pygame
 import os
 from constants import *
-from classes import *
+from simulation import *
+from interface import *
 
 pygame.init()
 
@@ -72,7 +73,7 @@ def main(window, width, height):
         for event in events:
             if event.type == pygame.QUIT:
                 run = False
-                # exit()
+                pygame.quit()
         pygame.display.update()
 
 
