@@ -17,29 +17,21 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-def _and(a, b):
-    return a.status and b.status
+import pygame
+import operations as ops
+from constants import *
+
+pygame.init()
 
 
-def _or(a, b):
-    return a.status or b.status
-
-
-def _xor(a, b):
-    return a.status ^ b.status
-
-
-def _not(a):
-    return not a.status
-
-
-def _nand(a, b):
-    return not (a.status and b.status)
-
-
-def _xnor(a, b):
-    return a.status == b.status
-
-
-def _nor(a, b):
-    return not (a.status or b.status)
+class Board:
+    def __init__(self):
+        self.x, self.y, self.width, self.height = BOX
+        self.texts = {}
+        self.ops = []
+        self.paths = []
+        self.moving_op = None
+    
+    def update(self, window, events):
+        for op in self.ops:
+            op.update(window, events)

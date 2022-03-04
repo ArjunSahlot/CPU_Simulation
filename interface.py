@@ -14,7 +14,7 @@
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#  along with this program.  If not, see <https:/www.gnu.org/licenses/>.
 #
 
 import pygame
@@ -29,26 +29,25 @@ class Text:
 
     def __init__(self, x, text):
         self.x = x
+        self.name = text
         self.text = self.font.render(text.upper(), 1, WHITE)
         self.width = self.text.get_width() + 30
         self.color = (47, 47, 47)
 
-    def update(self, window, events):
+    def update(self, window):
         self.draw(window)
 
-        if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
+        if self.hovered():
             self.color = (62, 62, 62)
         else:
             self.color = (47, 47, 47)
 
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos()):
-                    return True
-            if event.type == pygame.MOUSEBUTTONUP:
-                if not pygame.Rect(50, self.y, 704, self.height).collidepoint(pygame.mouse.get_pos()):
-                    return False
+    def hovered(self):
+        mx, my = pygame.mouse.get_pos()
+        return self.x <= mx <= self.x+self.width and self.y <= my <= self.y+self.height
 
     def draw(self, window):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
-        window.blit(self.text, (self.x + self.width//2 - self.text.get_width()//2, self.y + self.height//2 - self.text.get_height()//3))
+        x = self.x + self.width/2 - self.text.get_width()/2
+        y = self.y + self.height/2 - self.text.get_height()/3
+        window.blit(self.text, (x, y))

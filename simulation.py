@@ -23,65 +23,42 @@ from constants import *
 
 pygame.init()
 
-COLOR_MAP = {
-    "and": (43, 124, 164),
-    "not": (146, 32, 25),
-    "nand": (93, 36, 180),
-    "or": (141, 78, 163),
-    "xor": (187, 58, 119),
-    "nor": (54, 116, 59),
-    "xnor": (129, 160, 200)
-}
-
 
 class Operator:
-    width, height = 200, 100
+    width = 200
     font = pygame.font.SysFont("comicsans", 45)
 
     def __init__(self, x, y, name):
         self.x, self.y = x, y
         self.name = name.upper()
         self.func = getattr(ops, "_" + name.lower())
-        self.color = COLOR_MAP[self.name.lower()]
-        if self.name.lower() == "not":
+        self.color = COLOR_MAP[name.lower()]
+        self.text_surf = self.font.render(self.name, 1, WHITE)
+        if name.lower() == "not":
             self.inputs = [Input(self, 1.5)]
             self.height = 60
         else:
             self.inputs = [Input(self, 1), Input(self, 2)]
+            self.height = 100
         self.output = Output(self)
 
-    def update(self, window, events):
-        mx, my = pygame.mouse.get_pos()
+    def update(self, window):
         self.draw(window)
         for input in self.inputs:
             input.update(window)
         self.output.update(window)
-        if all([inp.status for inp in self.inputs]):
+        if [inp.status for inp in self.inputs].count(None) == 0:
             self.output.status = self.func(*self.inputs)
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if self.x < mx < self.x + self.width and self.y < my < self.y + self.height:
-                    return True
-            if event.type == pygame.MOUSEBUTTONUP:
-                return False
 
     def hovered(self):
-        return pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(pygame.mouse.get_pos())
-    
-    def hovered_inps(self):
-        for inp in self.inputs:
-            if inp.hovered():
-                return inp
-        
-        return False
-    
-    def hovered_out(self):
-        return self.output.hovered()
+        mx, my = pygame.mouse.get_pos() 
+        return self.x < mx < self.x + self.width and self.y < my < self.y + self.height
 
     def draw(self, window):
         pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
-        text = self.font.render(self.name, 1, WHITE)
-        window.blit(text, (self.x + self.width // 2 - text.get_width() // 2, self.y + self.height // 2 - text.get_height() // 3))
+        x = self.x + self.width / 2 - self.text_surf.get_width() / 2
+        y = self.y + self.height / 2 - self.text_surf.get_height() / 3
+        window.blit(self.text_surf, (x, y))
 
     def __repr__(self):
         return self.name
@@ -92,7 +69,7 @@ class Input:
 
     def __init__(self, host, index):
         self.host = host
-        self.index = int((index - 1) * 2 + 1)
+        self.index = (index - 1) * 2 + 1
         self.x = self.y = 0
         self.output = None
         self.status = None
@@ -100,7 +77,7 @@ class Input:
 
     def calc_pos(self):
         self.x = self.host.x
-        self.y = int((self.host.height * (self.index / 4)) + self.host.y)
+        self.y = (self.host.height * (self.index / 4)) + self.host.y
 
     def update(self, window):
         self.calc_pos()
@@ -111,14 +88,10 @@ class Input:
             self.color = (170, 168, 170)
         else:
             self.color = (0, 0, 0)
-
-    def mouse_release(self, events):
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONUP:
-                return self.hovered()
     
     def hovered(self):
-        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2)**0.5 <= self.radius
+        mx, my = pygame.mouse.get_pos()
+        return (mx - self.x)**2 + (my - self.y)**2 <= self.radius**2
 
     def draw(self, window):
         pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
@@ -148,13 +121,9 @@ class Output:
         else:
             self.color = (0, 0, 0)
 
-    def mouse_clicked(self, events):
-        for event in events:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                return self.hovered()
-
     def hovered(self):
-        return ((pygame.mouse.get_pos()[0] - self.x)**2 + (pygame.mouse.get_pos()[1] - self.y)**2)**0.5 <= self.radius
+        mx, my = pygame.mouse.get_pos()
+        return (mx - self.x)**2 + (my - self.y)**2 <= self.radius**2
 
     def draw(self, window):
         pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
