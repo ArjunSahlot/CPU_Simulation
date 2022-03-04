@@ -20,18 +20,33 @@
 import pygame
 import operations as ops
 from constants import *
+from interface import Text
 
 pygame.init()
 
 
 class Board:
+    POSSIBLE_OPERATIONS = ["not", "and", "nand", "or", "xor", "nor", "xnor"]
+
     def __init__(self):
         self.x, self.y, self.width, self.height = BOX
-        self.texts = {}
+        self.texts = []
         self.ops = []
         self.paths = []
         self.moving_op = None
+
+        self.setup()
+
+    def setup(self):
+        prev = BOX[0]
+
+        for op in self.POSSIBLE_OPERATIONS:
+            t = Text(prev, op)
+            self.texts.append(t)
+            prev += t.width+1
     
     def update(self, window, events):
         for op in self.ops:
             op.update(window, events)
+        for text in self.texts:
+            text.draw(window)

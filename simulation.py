@@ -66,6 +66,8 @@ class Operator:
 
 class Input:
     radius = 15
+    COLOR_HOVER = (170, 168, 170)
+    COLOR_REST = (0, 0, 0)
 
     def __init__(self, host, index):
         self.host = host
@@ -73,28 +75,22 @@ class Input:
         self.x = self.y = 0
         self.output = None
         self.status = None
-        self.color = (0, 0, 0)
 
     def calc_pos(self):
         self.x = self.host.x
         self.y = (self.host.height * (self.index / 4)) + self.host.y
-
-    def update(self, window):
-        self.calc_pos()
-        self.draw(window)
-        if self.output is not None:
-            self.status = self.output.status
-        if self.hovered():
-            self.color = (170, 168, 170)
-        else:
-            self.color = (0, 0, 0)
     
     def hovered(self):
         mx, my = pygame.mouse.get_pos()
         return (mx - self.x)**2 + (my - self.y)**2 <= self.radius**2
 
     def draw(self, window):
-        pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
+        self.calc_pos()
+        if self.hovered():
+            color = self.COLOR_HOVER
+        else:
+            color = self.COLOR_REST
+        pygame.draw.circle(window, color, (self.x, self.y), self.radius)
 
     def plug(self, output):
         self.output = output
@@ -102,6 +98,8 @@ class Input:
 
 class Output:
     radius = 15
+    COLOR_HOVER = (170, 168, 170)
+    COLOR_REST = (0, 0, 0)
 
     def __init__(self, host):
         self.host = host
@@ -113,20 +111,17 @@ class Output:
         self.x = self.host.x + self.host.width
         self.y = self.host.y + self.host.height/2
 
-    def update(self, window):
-        self.calc_pos()
-        self.draw(window)
-        if self.hovered():
-            self.color = (170, 168, 170)
-        else:
-            self.color = (0, 0, 0)
-
     def hovered(self):
         mx, my = pygame.mouse.get_pos()
         return (mx - self.x)**2 + (my - self.y)**2 <= self.radius**2
 
     def draw(self, window):
-        pygame.draw.circle(window, self.color, (self.x, self.y), self.radius)
+        self.calc_pos()
+        if self.hovered():
+            color = self.COLOR_HOVER
+        else:
+            color = self.COLOR_REST
+        pygame.draw.circle(window, color, (self.x, self.y), self.radius)
 
 
 class Path:
@@ -148,16 +143,3 @@ class Path:
         
         color = (226, 22, 62) if self.output.status else (37, 35, 40)
         pygame.draw.line(window, color, p1, p2, self.width)
-
-
-class OperatorManager:
-    def __init__(self):
-        self.x, self.y, self.width, self.height = BOX
-        self.ops = []
-        self.paths = []
-        self.moving_op = None
-    
-    def update(self, window, events):
-        for op in self.ops:
-            op.update(window, events)
-        

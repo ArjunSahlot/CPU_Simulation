@@ -22,6 +22,7 @@ import os
 from constants import *
 from simulation import *
 from interface import *
+from ui import Board
 
 pygame.init()
 
@@ -36,24 +37,17 @@ def draw_window(window):
     pygame.draw.rect(window, (60, 60, 60), BOX, 10, border_radius=10)
 
 
-def main(window, width, height):
+def main(window):
     clock = pygame.time.Clock()
-    paths = []
-    ops = []
-    texts = {
-        "not": Text(50, "not"),
-        "and": Text(144, "and"),
-        "nand": Text(243, "nand"),
-        "or": Text(364, "or"),
-        "xor": Text(440, "xor"),
-        "nor": Text(536, "nor"),
-        "xnor": Text(634, "xnor"),
-    }
+
+    board = Board()
 
     while True:
         clock.tick(FPS) 
         draw_window(window)
         events = pygame.event.get()
+
+        board.update(window, events)
 
         for event in events:
             if event.type == pygame.QUIT:
@@ -63,4 +57,4 @@ def main(window, width, height):
         pygame.display.update()
 
 
-main(WINDOW, WIDTH, HEIGHT)
+main(WINDOW)

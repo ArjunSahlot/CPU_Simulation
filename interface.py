@@ -26,28 +26,26 @@ class Text:
     height = 65
     y = 815
     font = pygame.font.SysFont("comicsans", 45)
+    COLOR_HOVER = (62, 62, 62)
+    COLOR_REST = (47, 47, 47)
 
     def __init__(self, x, text):
         self.x = x
         self.name = text
         self.text = self.font.render(text.upper(), 1, WHITE)
         self.width = self.text.get_width() + 30
-        self.color = (47, 47, 47)
-
-    def update(self, window):
-        self.draw(window)
-
-        if self.hovered():
-            self.color = (62, 62, 62)
-        else:
-            self.color = (47, 47, 47)
 
     def hovered(self):
         mx, my = pygame.mouse.get_pos()
         return self.x <= mx <= self.x+self.width and self.y <= my <= self.y+self.height
 
     def draw(self, window):
-        pygame.draw.rect(window, self.color, (self.x, self.y, self.width, self.height))
+        if self.hovered():
+            color = self.COLOR_HOVER
+        else:
+            color = self.COLOR_REST
+
+        pygame.draw.rect(window, color, (self.x, self.y, self.width, self.height))
         x = self.x + self.width/2 - self.text.get_width()/2
         y = self.y + self.height/2 - self.text.get_height()/3
         window.blit(self.text, (x, y))
