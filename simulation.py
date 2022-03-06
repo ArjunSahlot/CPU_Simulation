@@ -28,12 +28,13 @@ class Operator:
     width = 200
     font = pygame.font.SysFont("comicsans", 45)
 
-    def __init__(self, x, y, name):
+    def __init__(self, x, y, name, moving=False):
         self.x, self.y = x, y
         self.name = name.upper()
         self.func = getattr(ops, "_" + name.lower())
         self.color = COLOR_MAP[name.lower()]
         self.text_surf = self.font.render(self.name, 1, WHITE)
+        self.moving = moving
         if name.lower() == "not":
             self.inputs = [Input(self, 1.5)]
             self.height = 60
@@ -43,10 +44,14 @@ class Operator:
         self.output = Output(self)
 
     def update(self, window):
+        if self.moving:
+            self.x, self.y = pygame.mouse.get_pos()
+            self.x -= self.width/2
+            self.y -= self.height/2
         self.draw(window)
         for input in self.inputs:
-            input.update(window)
-        self.output.update(window)
+            input.draw(window)
+        self.output.draw(window)
         if [inp.status for inp in self.inputs].count(None) == 0:
             self.output.status = self.func(*self.inputs)
 
@@ -59,6 +64,14 @@ class Operator:
         x = self.x + self.width / 2 - self.text_surf.get_width() / 2
         y = self.y + self.height / 2 - self.text_surf.get_height() / 3
         window.blit(self.text_surf, (x, y))
+
+    def stop_moving(self):
+        self.moving = False
+
+    def in_bound(self):
+        in_x = BOX[0] < self.x and self.x+self.width < BOX[0]+BOX[2]
+        in_y = BOX[1] < self.y and self.y+self.height < BOX[1]+BOX[3]
+        return in_x and in_y
 
     def __repr__(self):
         return self.name

@@ -17,10 +17,11 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+from typing import List, Optional
 import pygame
-import operations as ops
 from constants import *
 from interface import Text
+from simulation import Operator, Path
 
 pygame.init()
 
@@ -30,10 +31,10 @@ class Board:
 
     def __init__(self):
         self.x, self.y, self.width, self.height = BOX
-        self.texts = []
-        self.ops = []
-        self.paths = []
-        self.moving_op = None
+        self.texts: List[Text] = []
+        self.ops: List[Operator] = []
+        self.paths: List[Path] = []
+        self.moving_op: Optional[Operator] = None
 
         self.setup()
 
@@ -46,7 +47,31 @@ class Board:
             prev += t.width+1
     
     def update(self, window, events):
+        mx, my = pygame.mouse.get_pos()
+        mld = mrd = mlu = mru = False
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mld = event.button == 1
+                mrd = event.button == 3
+            if event.type == pygame.MOUSEBUTTONUP:
+                mlu = event.button == 1
+                mru = event.button == 3
+        md = mld or mrd
+        mu = mlu or mru
+
         for op in self.ops:
-            op.update(window, events)
+            op.update(window)
+
         for text in self.texts:
             text.draw(window)
+
+            if md and text.hovered():
+                self.moving_op = Operator(mx, my, text.name, True)
+
+        if self.moving_op is not None:
+            self.moving_op.update(window)
+            if mu:
+                self.moving_op.stop_moving()
+                if self.moving_op.in_bound():
+                    self.ops.append(self.moving_op)
+                self.moving_op = None
