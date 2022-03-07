@@ -37,7 +37,7 @@ class Text:
 
     def hovered(self):
         mx, my = pygame.mouse.get_pos()
-        return self.x <= mx <= self.x+self.width and self.y <= my <= self.y+self.height
+        return self.x < mx < self.x+self.width and self.y < my < self.y+self.height
 
     def draw(self, window):
         if self.hovered():

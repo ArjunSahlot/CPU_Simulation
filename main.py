@@ -43,7 +43,7 @@ def main(window):
     board = Board()
 
     while True:
-        clock.tick(FPS) 
+        clock.tick(FPS)
         draw_window(window)
         events = pygame.event.get()
 

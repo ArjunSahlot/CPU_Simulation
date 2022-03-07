@@ -68,6 +68,9 @@ class Operator:
     def stop_moving(self):
         self.moving = False
 
+    def start_moving(self):
+        self.moving = True
+
     def in_bound(self):
         in_x = BOX[0] < self.x and self.x+self.width < BOX[0]+BOX[2]
         in_y = BOX[1] < self.y and self.y+self.height < BOX[1]+BOX[3]

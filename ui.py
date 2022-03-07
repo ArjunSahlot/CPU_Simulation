@@ -35,6 +35,7 @@ class Board:
         self.ops: List[Operator] = []
         self.paths: List[Path] = []
         self.moving_op: Optional[Operator] = None
+        self.moving_path: Optional[Path] = None
 
         self.setup()
 
@@ -44,8 +45,8 @@ class Board:
         for op in self.POSSIBLE_OPERATIONS:
             t = Text(prev, op)
             self.texts.append(t)
-            prev += t.width+1
-    
+            prev += t.width + 1
+
     def update(self, window, events):
         mx, my = pygame.mouse.get_pos()
         mld = mrd = mlu = mru = False
@@ -59,15 +60,28 @@ class Board:
         md = mld or mrd
         mu = mlu or mru
 
+        # Handle current operators
+        rem = None
         for op in self.ops:
             op.update(window)
+        for i, op in enumerate(reversed(self.ops)):
+            if mld and op.hovered():
+                rem = len(self.ops) - i - 1
+                self.moving_op = op
+                self.moving_op.start_moving()
+                break
 
+        if rem is not None:
+            self.ops.pop(rem)
+
+        # Handle creating operators
         for text in self.texts:
             text.draw(window)
 
-            if md and text.hovered():
+            if mld and text.hovered():
                 self.moving_op = Operator(mx, my, text.name, True)
 
+        # Handle active operator in motion
         if self.moving_op is not None:
             self.moving_op.update(window)
             if mu:
